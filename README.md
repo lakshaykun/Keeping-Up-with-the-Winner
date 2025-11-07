@@ -1,6 +1,6 @@
 # Keeping Up with the Winner
 
-This repository implements the research paper (`[**Keeping Up with the Winner! Targeted Advertisement to Communities in Social Networks**](https://arxiv.org/abs/2403.19903)`). The project includes algorithms for computing critical parameters, running local perturbation search (Algorithm 1), comparing baseline strategies, and provides an interactive Streamlit dashboard for exploration and analysis.
+This repository implements the research paper **Keeping Up with the Winner! Targeted Advertisement to Communities in Social Networks** (`[text](https://arxiv.org/abs/2403.19903)`). The project includes algorithms for computing critical parameters, running local perturbation search (Algorithm 1), comparing baseline strategies, and provides an interactive Streamlit dashboard for exploration and analysis.
 
 ## Overview
 
