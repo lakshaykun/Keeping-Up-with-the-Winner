@@ -17,18 +17,18 @@ from plots import plot_market_share_vs_eps, fig_to_png_bytes
 from baselines import baseline_degree, baseline_eigenvector, baseline_netshield
 
 st.set_page_config(page_title="bi-SIS Community Targeting", layout="wide")
-st.title("bi-SIS Community Targeting — Research Dashboard")
+st.title("Keeping Up with the Winner — Survival Threshold Dashboard")
 
 st.markdown(
     """
-**Workflow**
-1. **Upload/Select Graph** →
-2. **Configure Parameters** →
-3. **Compute Critical (μ_c, u_c)** →
-4. **Run Algorithm 1 (ε-sweep)** →
-5. **Compare Baselines** →
-6. **Export Results**
-"""
+        **Workflow**
+        1. **Upload/Select Graph** →
+        2. **Configure Parameters** →
+        3. **Compute Critical (μ_c, u_c)** →
+        4. **Run Algorithm 1 (ε-sweep)** →
+        5. **Compare Baselines** →
+        6. **Export Results**
+    """
 )
 
 # -----------------------
@@ -47,11 +47,13 @@ with st.sidebar:
     tau1 = st.number_input("tau1 (Product 1)", min_value=0.001, max_value=2.0, value=0.8, step=0.01)
     tau2 = st.number_input("tau2 (Product 2)", min_value=0.001, max_value=2.0, value=0.05, step=0.01)
 
-    st.header("3) Algorithm 1 Settings")
+    st.header("3) Sweep Configuration")
+    delta_C = st.number_input("Budget increment ΔC", min_value=1e-5, max_value=10.0, value=0.1, step=0.01)
+    num_steps = st.slider("Number of budget increments", min_value=5, max_value=30, value=15)
     eps_min = st.number_input("epsilon min", value=1e-8, format="%.1e")
     eps_max = st.number_input("epsilon max", value=1e-1, format="%.1e")
     num_eps = st.slider("# epsilon points (log-spaced)", min_value=5, max_value=30, value=15)
-    iters = st.slider("Local-search iterations per epsilon", min_value=1, max_value=10, value=1)
+    iters = st.slider("Local-search iterations", min_value=1, max_value=10, value=1)
 
     st.header("4) Cost Scheme")
     cost_scheme = st.selectbox("Costs w_i", ["Homogeneous (all 1)", "Degree", "Eigenvector"])
@@ -145,6 +147,68 @@ x_star = st.session_state["x_star"]
 # Epsilon sweep
 # -----------------------
 log_eps = np.logspace(np.log10(eps_min), np.log10(eps_max), num_eps)
+
+if st.button("Run Auto Budget Sweep"):
+    w = costs
+    C_min = np.sqrt(mu_c) * np.dot(w, u_c)
+    st.metric("Critical Budget C_min", f"{C_min:.4f}")
+
+    budgets = [C_min + k * delta_C for k in range(num_steps)]
+
+    rows = []
+    for C in budgets:
+        scale0 = C / (np.sqrt(mu_c) * np.dot(costs, u_c))
+        u_scaled = np.clip(u_c * scale0, 0, 1)
+
+        u_opt = algorithm1_local_search(
+            A, tau1, tau2, mu_c, u_scaled, x_star, eps_min,
+            iters=iters, costs=costs, budget_C=C
+        )
+
+
+        x, y = simulate_fixed_point(A, tau1, tau2, mu_c, u_opt)
+
+        # More robust effective community definition
+        eff_size = float(np.sum(u_opt) * len(u_opt))
+
+        rows.append({
+            "Budget": float(C),
+            "AvgX": float(x.mean()),
+            "AvgY": float(y.mean()),
+            "EffSize": eff_size
+        })
+
+    df = pd.DataFrame(rows)
+    st.session_state["budget_results_df"] = df
+
+    st.subheader("Results: Survival Threshold Experiment")
+    st.dataframe(df)
+
+    # --- Plot AvgY vs Budget ---
+    fig1 = plt.figure()
+    plt.plot(df["Budget"], df["AvgY"], marker="o")
+    plt.axvline(x=C_min, color='r', linestyle='--', label='C_min (Critical)')
+    plt.xlabel("Budget C")
+    plt.ylabel("AvgY (Product 2)")
+    plt.title("Product 2 Survival vs Budget")
+    plt.legend()
+    plt.grid(True, which="both", ls=":")
+    st.pyplot(fig1)
+
+    # --- Plot Effective Community Size ---
+    fig2 = plt.figure()
+    plt.plot(df["Budget"], df["EffSize"], marker="s", color="purple")
+    plt.axvline(x=C_min, color='r', linestyle='--', label='C_min (Critical)')
+    plt.xlabel("Budget C")
+    plt.ylabel("Expected Community Size (Σu_i)")
+    plt.title("Community Expansion vs Budget")
+    plt.legend()
+    plt.grid(True, which="both", ls=":")
+    st.pyplot(fig2)
+
+    # Download CSV
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button("Download Sweep Results CSV", csv, file_name="budget_sweep_results.csv")
 
 if st.button("Run Algorithm 1 (ε-sweep)"):
     rows = []

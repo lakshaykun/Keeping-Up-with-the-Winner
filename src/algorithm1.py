@@ -1,20 +1,29 @@
 import numpy as np
 from numpy.linalg import eig
 
-
 def pf_eigenvector(M):
     w, v = eig(M)
     idx = np.argmax(w.real)
     return v[:, idx].real
 
-
-def algorithm1_local_search(A, tau1, tau2, mu_c, u_c, x_star, eps, iters=1, costs=None):
-    """Implements the one-step perturbation-based local search (Algorithm 1).
-    We respect the weighted budget constraint sum_i w_i * delta_i = 0 by pairing
-    +eps and -eps assignments according to descending (nu_i / w_i).
+def algorithm1_local_search(
+    A,
+    tau1,
+    tau2,
+    mu_c,
+    u_init,
+    x_star,
+    eps,
+    iters=1,
+    costs=None,
+    budget_C=None
+):
     """
-    N = len(u_c)
-    Sx = np.diag(1.0 - x_star)
+    Local perturbation-based optimization respecting a custom budget constraint:
+        sqrt(mu_c) * sum_i w_i u_i = budget_C
+    """
+    N = len(u_init)
+    u = u_init.copy()
 
     if costs is None:
         w = np.ones(N)
@@ -22,32 +31,29 @@ def algorithm1_local_search(A, tau1, tau2, mu_c, u_c, x_star, eps, iters=1, cost
         w = np.asarray(costs).astype(float)
         w[w <= 0] = 1.0
 
-    u = u_c.copy()
-
     for _ in range(iters):
+        Sx = np.diag(1.0 - x_star)
         B = Sx @ (A + mu_c * np.outer(u, u))
-        nu = pf_eigenvector(B)  # PF eigenvector around critical point
+        nu = pf_eigenvector(B)
 
+        # Perturbation direction
         score = nu / w
         order = np.argsort(-score)
 
         delta = np.zeros(N)
         half = N // 2
-        pos_idx = order[:half]
-        neg_idx = order[half:]
+        delta[order[:half]] = +eps
+        delta[order[half:]] = -eps
 
-        delta[pos_idx] = +eps
-        delta[neg_idx] = -eps
+        # Apply and clip
+        u_new = np.clip(u + delta, 0, 1)
 
-        # Project to [0,1] and re-center to satisfy approximate weighted zero-sum
-        u_new = np.clip(u + delta, 0.0, 1.0)
-
-        # Optional fine correction to enforce sum(w*delta)=0 approximately
-        gap = np.dot(w, (u_new - u))
-        if abs(gap) > 1e-12:
-            # shift uniformly over free variables
-            adjust = gap / w.sum()
-            u_new = np.clip(u_new - adjust, 0.0, 1.0)
+        # Enforce budget constraint
+        if budget_C is not None:
+            current = np.sqrt(mu_c) * np.dot(w, u_new)
+            if current > 0:
+                scale = budget_C / current
+                u_new = np.clip(u_new * scale, 0, 1)
 
         u = u_new
 
