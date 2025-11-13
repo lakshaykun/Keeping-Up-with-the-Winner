@@ -51,6 +51,7 @@ The model enables strategic intervention through targeted community influence (p
 - ✅ **Optimized Performance**: Parallel processing for computationally intensive tasks (2-4x faster)
 - ✅ **Experiment Reproducibility**: Scripts to reproduce research figures from the paper
 - ✅ **Export Capabilities**: Download results as CSV and visualizations as PNG
+- ✅ **PDF Report Generation**: One-click comprehensive reports with all analyses and visualizations
 - ✅ **Adaptive Algorithms**: Smart optimization based on graph size and task complexity
 
 ---
@@ -77,6 +78,7 @@ Keeping-Up-with-the-Winner/
 │   ├── baselines.py              # Baseline targeting strategies (Degree, Eigenvector, NetShield)
 │   ├── bisis.py                  # bi-SIS ODE model and fixed-point solver
 │   ├── critical_params.py        # Critical parameter computation (Lemma 3.2)
+│   ├── pdf_report.py             # PDF report generation with comprehensive analysis
 │   ├── plots.py                  # Visualization utilities for results
 │   ├── run_experiments.py        # Experiment orchestration and epsilon-sweep logic
 │   └── utils.py                  # Graph loading and utility functions
@@ -121,6 +123,7 @@ Core implementation modules:
 | `baselines.py` | Baseline strategies: degree centrality, eigenvector centrality, and simplified NetShield approach |
 | `bisis.py` | ODE system solver for bi-SIS dynamics using `scipy.integrate.solve_ivp` (RK45 method) with pre-computation optimizations |
 | `critical_params.py` | Computes critical intervention parameters (μ_c, u_c) via Perron-Frobenius analysis and fixed-point iteration |
+| `pdf_report.py` | Generates comprehensive PDF reports with executive summary, all analyses, visualizations, and professional formatting using ReportLab |
 | `plots.py` | Matplotlib-based visualization functions for market share, budget sweeps, and comparative analysis |
 | `run_experiments.py` | High-level experiment runner that coordinates epsilon sweeps and result aggregation |
 | `utils.py` | Graph I/O utilities (edgelist/CSV parsing, adjacency matrix conversion, symmetry enforcement) |
@@ -200,6 +203,13 @@ The dashboard will open in your default web browser at `http://localhost:8501`.
   - Eigenvector Centrality - target influential nodes
   - NetShield - network protection-inspired approach
 
+- **PDF Report Generation**:
+  - One-click comprehensive report with all analyses
+  - Professional formatting with executive summary
+  - Embedded visualizations and statistical tables
+  - Includes graph statistics, parameters, critical analysis, budget/epsilon results, and method comparisons
+  - Timestamped downloads for archival
+
 ---
 
 ## 📚 Usage Guide
@@ -252,6 +262,12 @@ Choose your analysis type:
   - Method comparison charts
 - **CSV Export**: Download numerical results for further analysis
 - **PNG Export**: Save publication-quality figures
+- **PDF Report**: Generate comprehensive report with one click
+  - Runs all analyses with your custom settings
+  - Includes executive summary, graph statistics, all parameters
+  - Embeds all visualizations and result tables
+  - Professional formatting ready for presentation
+  - Timestamped download (e.g., `bi_sis_report_20251113_143025.pdf`)
 
 ---
 
@@ -390,6 +406,8 @@ networkx       # Graph operations and algorithms
 matplotlib     # Plotting and visualization
 pandas         # Data manipulation and export
 streamlit      # Interactive web dashboard
+reportlab      # PDF report generation
+Pillow         # Image processing for PDF embedding
 ```
 
 **Installation**:
@@ -628,6 +646,7 @@ Please open an issue or submit a pull request.
 | `epsilon_product1.png` | Product 1 vs epsilon |
 | `comparison_AvgY.png` | All methods comparison |
 | `full_results.csv` | Complete analysis dataset |
+| `bi_sis_report_YYYYMMDD_HHMMSS.pdf` | Comprehensive PDF report with all analyses |
 
 ---
 
