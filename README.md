@@ -86,7 +86,8 @@ Keeping-Up-with-the-Winner/
 ├── requirements.txt              # Python package dependencies
 ├── README.md                     # This file
 ├── LICENSE                       # MIT License
-└── Keeping Up with the Winner.pdf  # The original research paper
+├── Keeping Up with the Winner.pdf  # The original research paper (arXiv:2403.19903)
+└── Keeping Up with the Winner!.pptx  # Presentation slides for the research
 ```
 
 ### Directory Explanations
@@ -166,6 +167,25 @@ streamlit run dashboard/app.py
 The dashboard will open in your default web browser at `http://localhost:8501`.
 
 > **💡 Tip**: The dashboard includes an interactive tutorial - click the "📋 How to Use This Dashboard" expander at the top for step-by-step guidance.
+
+---
+
+## 📚 Research Materials
+
+This repository includes complete research documentation:
+
+- **📄 Paper** (`Keeping Up with the Winner.pdf`): The original peer-reviewed research paper
+  - Full technical details of the bi-SIS model
+  - Theoretical analysis and proofs
+  - Experimental results on SNAP datasets
+  - Reference: [arXiv:2403.19903](https://arxiv.org/abs/2403.19903)
+
+- **🎯 Presentation Slides** (`Keeping Up with the Winner!.pptx`): Conference presentation
+  - Visual overview of the research problem
+  - Model explanation with diagrams
+  - Key findings and results
+  - Algorithm walkthrough
+  - Perfect for understanding the work at a high level
 
 ---
 
